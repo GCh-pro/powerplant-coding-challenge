@@ -1,0 +1,10 @@
+
+bin/
+obj/
+.git/
+.vscode/
+.idea/
+*.md
+Dockerfile
+docker-compose*
+

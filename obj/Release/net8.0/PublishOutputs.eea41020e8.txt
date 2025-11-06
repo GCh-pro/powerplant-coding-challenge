@@ -1,0 +1,16 @@
+C:\Users\Guillaume_Chinzi\code\powerplant-coding-challenge\out\powerplant-coding-challenge.exe
+C:\Users\Guillaume_Chinzi\code\powerplant-coding-challenge\out\appsettings.Development.json
+C:\Users\Guillaume_Chinzi\code\powerplant-coding-challenge\out\appsettings.json
+C:\Users\Guillaume_Chinzi\code\powerplant-coding-challenge\out\example_payloads\payload1.json
+C:\Users\Guillaume_Chinzi\code\powerplant-coding-challenge\out\example_payloads\payload2.json
+C:\Users\Guillaume_Chinzi\code\powerplant-coding-challenge\out\example_payloads\payload3.json
+C:\Users\Guillaume_Chinzi\code\powerplant-coding-challenge\out\example_payloads\response3.json
+C:\Users\Guillaume_Chinzi\code\powerplant-coding-challenge\out\powerplant-coding-challenge.dll
+C:\Users\Guillaume_Chinzi\code\powerplant-coding-challenge\out\powerplant-coding-challenge.deps.json
+C:\Users\Guillaume_Chinzi\code\powerplant-coding-challenge\out\powerplant-coding-challenge.runtimeconfig.json
+C:\Users\Guillaume_Chinzi\code\powerplant-coding-challenge\out\powerplant-coding-challenge.pdb
+C:\Users\Guillaume_Chinzi\code\powerplant-coding-challenge\out\Microsoft.AspNetCore.OpenApi.dll
+C:\Users\Guillaume_Chinzi\code\powerplant-coding-challenge\out\Microsoft.OpenApi.dll
+C:\Users\Guillaume_Chinzi\code\powerplant-coding-challenge\out\Swashbuckle.AspNetCore.Swagger.dll
+C:\Users\Guillaume_Chinzi\code\powerplant-coding-challenge\out\Swashbuckle.AspNetCore.SwaggerGen.dll
+C:\Users\Guillaume_Chinzi\code\powerplant-coding-challenge\out\Swashbuckle.AspNetCore.SwaggerUI.dll

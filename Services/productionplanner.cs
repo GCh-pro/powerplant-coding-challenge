@@ -1,98 +1,96 @@
+using System;
+using System.Linq;
+using System.Collections.Generic;
 using Models;
 
-namespace Services;
-
-public class ProductionPlanner : IProductionPlanner
+namespace Services
 {
-    public List<ProductionPlanItem> ComputePlan(PowerPlantRequest request)
+    public class ProductionPlanner : IProductionPlanner
     {
-        double remainingLoad = request.Load;
-        var result = new List<ProductionPlanItem>();
-
-        // Calculate cost and available power for each plant, then sort by cost
-        var plants = request.Powerplants
-            .Select(p => new
-            {
-                Plant = p,
-                Cost = CalculateCost(p, request.Fuels),
-                Available = CalculateAvailablePower(p, request.Fuels)
-            })
-            .OrderBy(x => x.Cost)
-            .ToList();
-
-        // Allocate power to each plant in merit order (cheapest first)
-        foreach (var p in plants)
+        public List<ProductionPlanItem> ComputePlan(PowerPlantRequest request)
         {
-            if (remainingLoad <= 0)
+            double remainingLoad = request.Load;
+            var result = new List<ProductionPlanItem>();
+
+            // Calculer le coût et la puissance disponible pour chaque centrale, puis trier par coût croissant
+            var plants = request.Powerplants
+                .Select(p => new
+                {
+                    Plant = p,
+                    Cost = CalculateCost(p, request.Fuels),
+                    Available = CalculateAvailablePower(p, request.Fuels)
+                })
+                .OrderBy(x => x.Cost)
+                .ToList();
+
+            // Parcourir les centrales dans l'ordre de coût (merit order)
+            foreach (var p in plants)
             {
-                // No load left, but we must include all plants with 0 power
-                result.Add(new ProductionPlanItem { Name = p.Plant.Name, P = 0 });
-                continue;
+                double production = 0;
+
+                // Pour les éoliennes, on produit jusqu'à la charge restante ou la puissance disponible
+                if (p.Plant.Type == "windturbine")
+                {
+                    production = Math.Min(p.Available, remainingLoad);
+                }
+                else
+                {
+                    // Vérifier si on peut produire au moins Pmin
+                    if (remainingLoad >= p.Plant.Pmin)
+                    {
+                        // On produit au maximum de ce qu'on peut fournir ou ce qui reste à produire
+                        production = Math.Min(p.Available, remainingLoad);
+                    }
+                    else
+                    {
+                        // Si produire cette centrale serait en dessous de Pmin, on ne l'utilise pas
+                        production = 0;
+                    }
+                }
+
+                result.Add(new ProductionPlanItem
+                {
+                    Name = p.Plant.Name,
+                    P = Math.Round(production, 1)
+                });
+
+                remainingLoad -= production;
+
+                // Si la charge restante est complétée, on peut arrêter
+                if (remainingLoad <= 0)
+                    break;
             }
 
-            // Calculate how much this plant should produce
-            double produced = CalculateProduction(p.Plant, p.Available, remainingLoad);
-
-            result.Add(new ProductionPlanItem
+            // Remplir les centrales restantes avec 0 si elles n'ont pas été utilisées
+            foreach (var p in plants)
             {
-                Name = p.Plant.Name,
-                P = Math.Round(produced, 1) // Round to 1 decimal for precision
-            });
-
-            remainingLoad -= produced;
-        }
-
-        // If we have a tiny remainder due to rounding, adjust the last non-zero plant
-        if (Math.Abs(remainingLoad) > 0.01)
-        {
-            var lastNonZero = result.FindLast(x => x.P > 0);
-            if (lastNonZero != null)
-            {
-                lastNonZero.P = Math.Round(lastNonZero.P - remainingLoad, 1);
+                if (!result.Any(r => r.Name == p.Plant.Name))
+                {
+                    result.Add(new ProductionPlanItem { Name = p.Plant.Name, P = 0 });
+                }
             }
+
+            return result;
         }
 
-        return result;
-    }
-
-    private double CalculateCost(PowerPlant plant, Fuels fuels)
-    {
-        return plant.Type switch
+        private double CalculateCost(PowerPlant plant, Fuels fuels)
         {
-            "gasfired" => (fuels.Gas / plant.Efficiency) + (0.3 * fuels.Co2),
-            "turbojet" => (fuels.Kerosine / plant.Efficiency),
-            "windturbine" => 0, // Wind is free!
-            _ => double.MaxValue // Unknown plant types are most expensive
-        };
-    }
-
-    private double CalculateAvailablePower(PowerPlant plant, Fuels fuels)
-    {
-        if (plant.Type == "windturbine")
-        {
-            // Wind turbine's Pmax is reduced by the wind percentage
-            return plant.Pmax * (fuels.Wind / 100.0);
+            return plant.Type switch
+            {
+                "gasfired" => (fuels.Gas / plant.Efficiency) + (0.244 * fuels.Co2),
+                "turbojet" => (fuels.Kerosine / plant.Efficiency) + (0.267 * fuels.Co2),
+                "windturbine" => 0,
+                _ => double.MaxValue
+            };
         }
 
-        return plant.Pmax;
-    }
-
-    private double CalculateProduction(PowerPlant plant, double availablePower, double remainingLoad)
-    {
-        // For wind turbines, use whatever power is available up to the remaining load
-        if (plant.Type == "windturbine")
+        private double CalculateAvailablePower(PowerPlant plant, Fuels fuels)
         {
-            return Math.Min(availablePower, remainingLoad);
+            if (plant.Type == "windturbine")
+            {
+                return plant.Pmax * (fuels.Wind / 100.0);
+            }
+            return plant.Pmax;
         }
-
-        // For other plants, respect Pmin constraint if possible
-        if (remainingLoad >= plant.Pmin)
-        {
-            // We can satisfy Pmin, so use between Pmin and min(Pmax, remainingLoad)
-            return Math.Min(availablePower, Math.Max(plant.Pmin, remainingLoad));
-        }
-
-        // Can't satisfy Pmin - if this is the last bit of load, generate it anyway
-        return remainingLoad > 0 ? remainingLoad : 0;
     }
 }
