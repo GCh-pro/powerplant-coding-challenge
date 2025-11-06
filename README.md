@@ -38,5 +38,7 @@ Api is design within' a mvc ErrorOr pattern. If the posted object is not a full 
 =>
 docker build -t powerplant-api .    
 docker run -p 8888:8080 powerplant-api
+
 after that you can call 
+
 http://localhost:8888/productionplan in POST with the proper json file. 
