@@ -2,3 +2,7 @@
 bin/
 obj/
 out/
+
+.git/ 
+.gitignore
+.vs/

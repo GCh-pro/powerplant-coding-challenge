@@ -12,7 +12,7 @@ namespace Services
             double remainingLoad = request.Load;
             var result = new List<ProductionPlanItem>();
 
-            // Calculer le coût et la puissance disponible pour chaque centrale, puis trier par coût croissant
+            // Calculate if the cost and available power for each plant, then sort by ascending cost
             var plants = request.Powerplants
                 .Select(p => new
                 {
@@ -23,27 +23,27 @@ namespace Services
                 .OrderBy(x => x.Cost)
                 .ToList();
 
-            // Parcourir les centrales dans l'ordre de coût (merit order)
+            // Scan through plants in order of cost (merit order)
             foreach (var p in plants)
             {
                 double production = 0;
 
-                // Pour les éoliennes, on produit jusqu'à la charge restante ou la puissance disponible
+                // For wind turbines, we produce up to the remaining load or the available power
                 if (p.Plant.Type == "windturbine")
                 {
                     production = Math.Min(p.Available, remainingLoad);
                 }
                 else
                 {
-                    // Vérifier si on peut produire au moins Pmin
+                    // Check if we can produce at least Pmin
                     if (remainingLoad >= p.Plant.Pmin)
                     {
-                        // On produit au maximum de ce qu'on peut fournir ou ce qui reste à produire
+                        // Produce the maximum we can provide or what remains to be produced
                         production = Math.Min(p.Available, remainingLoad);
                     }
                     else
                     {
-                        // Si produire cette centrale serait en dessous de Pmin, on ne l'utilise pas
+                        // If producing this plant would be below Pmin, we don't use it
                         production = 0;
                     }
                 }
@@ -56,12 +56,12 @@ namespace Services
 
                 remainingLoad -= production;
 
-                // Si la charge restante est complétée, on peut arrêter
+                // If the remaining load is complete, we can stop
                 if (remainingLoad <= 0)
                     break;
             }
 
-            // Remplir les centrales restantes avec 0 si elles n'ont pas été utilisées
+            // Fill remaining plants with 0 if they were not used
             foreach (var p in plants)
             {
                 if (!result.Any(r => r.Name == p.Plant.Name))
