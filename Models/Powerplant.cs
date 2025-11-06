@@ -22,10 +22,10 @@ public class Fuels
 public class PowerPlant
 {
     [JsonPropertyName("name")]
-    public string Name { get; set; }
+    public required string Name { get; set; }
     
     [JsonPropertyName("type")]
-    public string Type { get; set; }
+    public required string Type { get; set; }
     
     [JsonPropertyName("efficiency")]
     public double Efficiency { get; set; }
@@ -43,9 +43,18 @@ public class PowerPlantRequest
     public int Load { get; set; }
     
     [JsonPropertyName("fuels")]
-    public Fuels Fuels { get; set; }
+    public required Fuels Fuels { get; set; }
     
     [JsonPropertyName("powerplants")]
-    public List<PowerPlant> Powerplants { get; set; }
+    public required List<PowerPlant> Powerplants { get; set; } = new();
+}
+
+public class ProductionPlanItem
+{
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = "";
+    
+    [JsonPropertyName("p")]
+    public double P { get; set; }
 }
 
