@@ -4,9 +4,7 @@
 Api is design within' a mvc ErrorOr pattern. If the posted object is not a full parsable powerplant object it will return an error.  Mapper for DTO object <Tin, Tout>
 
 
-# Production Planning Algorithm
-
-### Algorithm Steps
+## Algorithm Steps
 
 1. **Calculate Costs and Available Power**  
    For each power plant, calculate:
